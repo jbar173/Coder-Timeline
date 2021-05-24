@@ -1,8 +1,14 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from . import models
-from . import serializers
+from rest_framework import permissions, generics
+from .serializers import (UserSerializer, AccountSerializer, ProjectSerializer,
+                          ProjectSectionSerializer)
+from .models import (Account, Project, ProjectSection)
+from django.contrib.auth.models import User
+import datetime
+import json
 
 
 # Create your views here.
@@ -10,12 +16,17 @@ from . import serializers
 @api_view(['GET',])
 def apiOverview(request):
     api_urls = {
-        'Account timeline':'/account-timeline/(?P<acc_id>\d+)/',
-        'Github project detail':'/ghp-detail/(?P<git_proj_id>\d+)/',
-        'Github commit detail':'/ghpc-detail/(?P<com_id>\d+)/',
+        'User list': '/user-list/',
+        'User detail': '/user-detail/(?P<id>\d+)/',
+        'Account detail':'/account-detail/(?P<acc_id>\d+)/',
+
+        'Project list':'/p-list/',
         'Project detail':'/p-detail/(?P<proj_id>\d+)/',
+
+        'Project section list':'/ps-list/(?P<proj_id>\d+)/',
         'Project section detail':'/ps-detail/(?P<proj_sec_id>\d+)/',
-        'Create project':'/create-project/(?P<acc_id>\d+)/',
+
+        'Create project':'/create-project/',
         'Update project':'/update-project/(?P<proj_id>\d+)/',
         'Delete project':'/delete-project/(?P<proj_id>\d+)/',
         'Create project section':'/create-ps/(?P<proj_id>\d+)/',
@@ -25,111 +36,137 @@ def apiOverview(request):
     return Response(api_urls)
 
 
+
+# POST
+@api_view(['POST',])
+def createProject(request):
+    serializer = ProjectSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        print("not valid")
+        print(serializer.errors)
+    return Response(serializer.data)
+
+
+@api_view(['POST',])
+def updateProject(request,proj_id):
+    project = Project.objects.get(id=proj_id)
+    x = request.data
+    y = x.get('created_at')
+    try:
+        y = datetime.datetime.strptime(y,"%B %d, %Y").strftime("%Y-%m-%d")
+        x['created_at'] = y
+        serializer = ProjectSerializer(instance=project,data=x)
+    except:
+        serializer = ProjectSerializer(instance=project,data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        print("not valid")
+        print(serializer.errors)
+    return Response(serializer.data)
+
+
+@api_view(['POST',])
+def createProjectSection(request,proj_id):
+    serializer = ProjectSectionSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        print("not valid")
+        print(serializer.errors)
+    return Response(serializer.data)
+
+
+@api_view(['POST',])
+def updateProjectSection(request,proj_sec_id):
+    project_section = ProjectSection.objects.get(id=proj_sec_id)
+    x = request.data
+    y = x.get('date')
+    try:
+        y = datetime.datetime.strptime(y,"%B %d, %Y").strftime("%Y-%m-%d")
+        x['date'] = y
+        serializer = ProjectSectionSerializer(instance=project_section,data=x)
+    except:
+        serializer = ProjectSectionSerializer(instance=project_section,data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        print("not valid")
+        print(serializer.errors)
+    return Response(serializer.data)
+
+
+
 # GET
-@api_view(['GET'])
-def accountDetail(request,acc_id):
-    account = models.Account.objects.get(id=acc_id)
-    serializer = serializers.AccountSerializer(account,many=False)
-    return Response(serializer.data)
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = UserSerializer(queryset, many=True)
+        x = self.request.user.id
+        y = {"user_list":""}
+        z = dict(zip(y,serializer.data))
+        z['current_id'] = x
+        print(f"user id: {x}")
+        return Response(z)
+        # return Response(serializer.data)
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 
 @api_view(['GET'])
-def githubProjectDetail(request,git_proj_id):
-    github_project = models.GithubProject.objects.get(id=git_proj_id)
-    serializer = serializers.GithubProjectSerializer(github_project,many=False)
+def accountDetail(request,acc_username):
+    account = Account.objects.get(username=acc_username)
+    serializer = AccountSerializer(account,many=False)
     return Response(serializer.data)
-
-@api_view(['GET'])
-def commitDetail(request,com_id):
-    commit = models.Commit.objects.get(id=com_id)
-    serializer = serializers.CommitSerializer(commit,many=False)
-    return Response(serializer.data)
-
-
 
 @api_view(['GET'])
 def projectDetail(request,proj_id):
-    project = models.Project.objects.get(id=proj_id)
-    serializer = serializers.ProjectSerializer(project,many=False)
+    project = Project.objects.get(id=proj_id)
+    serializer = ProjectSerializer(project,many=False)
     return Response(serializer.data)
 
 @api_view(['GET'])
 def projectSectionDetail(request,proj_sec_id):
-    project_section = models.ProjectSection.objects.get(id=proj_sec_id)
-    serializer = serializers.ProjectSectionSerializer(project_section,many=False)
-    return Response(serializer.data)
-
-
-
-@api_view(['GET'])
-def githubProjectList(request,acc_id):
-    github_projects = models.GithubProject.objects.all().order_by('-start_date')
-    serializer = serializers.GithubProjectSerializer(github_projects,many=True)
-    return Response(serializer.data)
-
-@api_view(['GET'])
-def commitList(request,git_proj_id):
-    commits = models.Commit.objects.all().order_by('-date')
-    serializer = serializers.CommitSerializer(commits,many=True)
+    project_section = ProjectSection.objects.get(id=proj_sec_id)
+    serializer = ProjectSectionSerializer(project_section,many=False)
     return Response(serializer.data)
 
 @api_view(['GET'])
 def projectList(request,acc_id):
-    projects = models.Project.objects.all().order_by('-start_date')
-    serializer = serializers.ProjectSerializer(projects,many=True)
+    x =  Project.objects.all()
+    projects = x.filter(account=acc_id).order_by('-created_at')
+    serializer = ProjectSerializer(projects,many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
 def projectSectionList(request,proj_id):
-    project_sections = models.ProjectSection.objects.all().order_by('-date')
-    serializer = serializers.ProjectSectionSerializer(project_sections,many=True)
-    return Response(serializer.data)
-
-
-### Timeline projects independent of GitHub (Create/Update/Delete): ###
-
-# POST
-@api_view(['POST',])
-def createProject(request,acc_id):
-    serializer = serializers.ProjectSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
-
-@api_view(['POST',])
-def updateProject(request,proj_id):
-    project = models.Project.objects.get(id=proj_id)
-    serializer = serializers.ProjectSerializer(instance=project,data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
-
-@api_view(['POST',])
-def createProjectSection(request,proj_id):
-    serializer = serializers.ProjectSectionSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data)
-
-@api_view(['POST',])
-def updateProjectSection(request,proj_sec_id):
-    project_section = models.Project.objects.get(id=proj_sec_id)
-    serializer = serializers.ProjectSectionSerializer(instance=project_section,data=request.data)
-    if serializer.is_valid():
-        serializer.save()
+    x = ProjectSection.objects.all()
+    project_sections = x.filter(project=proj_id).order_by('date')
+    serializer = ProjectSectionSerializer(project_sections,many=True)
     return Response(serializer.data)
 
 
 # DELETE
 @api_view(['DELETE',])
 def deleteProject(request,proj_id):
-    project = models.Project.objects.get(id=proj_id)
+    project = Project.objects.get(id=proj_id)
     project_name = project.name
     project.delete()
-    return (f"{project_name} deleted.")
+    return Response(f"{project_name} deleted.")
 
 @api_view(['DELETE',])
 def deleteProjectSection(request,proj_sec_id):
-    project_section = models.ProjectSection.objects.get(id=proj_sec_id)
+    project_section = ProjectSection.objects.get(id=proj_sec_id)
     project_section_name = project_section.name
     project_section.delete()
-    return (f"{project_section_name} deleted.")
+    return Response(f"{project_section_name} deleted.")

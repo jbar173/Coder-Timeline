@@ -1,0 +1,573 @@
+
+/* NAVBAR: */
+.Navigation-bar{
+  display: flex;
+  flex-flow: row wrap;
+}
+.Nav-bar-right{
+  flex: 1 1 200px;
+  border-bottom: 1px solid lightgrey;
+  text-align: right;
+  padding-top: 5px;
+  padding-right: 0px;
+}
+.Nav-bar-left{
+  flex: 2 1 200px;
+  border-bottom: 1px solid lightgrey;
+  align-self: baseline;
+  padding-top: 5px;
+  padding-left:20px;
+}
+.brand{
+  font-family: monospace;
+  font-size: 2.5em;
+  margin-top: 10px;
+}
+.brand:hover{
+  color:green;
+}
+
+
+/* MAIN/OUTER LAYER: */
+body{
+  font-family: monospace;
+}
+#wrapper{
+  display:flex;
+}
+.centre{
+  margin: auto;
+  margin-left: 20px;
+  width: 100%;
+}
+.outer-bubble{
+  text-align: center;
+  justify-content: center;
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+.align-c{
+  align-self: center;
+}
+.t-align-centre{
+  text-align: center;
+}
+.margin-b{
+  margin-bottom: 30px;
+}
+.margin-t{
+  margin-top:20px;
+}
+.margin-r{
+  margin-right:20px;
+}
+.f-end{
+  margin:auto;
+  margin-bottom: 0px;
+}
+.tbl{
+  margin:auto;
+  margin-bottom:20px;
+}
+
+
+/* BOTTOM OF PAGE(SUPERUSER MENU): */
+.flex-col-end{
+  flex-direction:column;
+  text-align: center;
+  padding-left: 40px;
+  margin-bottom: 40px;
+}
+
+
+/* STICKY: START/END: */
+.search-user{
+  align-self: flex-start;
+  padding-top: 0px;
+  position:sticky;
+  position: -webkit-sticky;
+  top: 0px;
+}
+.user{
+  align-self: flex-start;
+  padding-top: 0px;
+  position:sticky;
+  position: -webkit-sticky;
+  top: 50px;
+}
+.arrows{
+  align-self: flex-start;
+  padding-top: 0px;
+  position:sticky;
+  position: -webkit-sticky;
+  top: 149px;
+}
+.end{
+  align-self: flex-end;
+  position:sticky;
+  position: -webkit-sticky;
+  top: 550px;
+}
+
+
+/* MAP LAYOUTS: */
+.green-bubble{
+  border: 2px solid lightgreen;
+  border-radius: 110px;
+  margin-bottom: 45px;
+  margin-left: 8px;
+  padding: 20px 5px 35px 5px;
+  max-width: 550px;
+  min-width: 300px;
+}
+.visible{
+  padding: 8px 30px 14px 56px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+.collapsed{
+  border: 1px solid white;
+  padding: 8px 8px 14px 8px;
+  overflow-x:hidden;
+  overflow-y:hidden;
+}
+.inner{
+  overflow-x:auto;
+}
+.inner-column{
+  flex-direction: row;
+  max-height: 225px;
+  overflow-x: scroll;
+  margin: auto;
+  width: 50%;
+}
+.commit-border{
+  border: 1px solid purple;
+  border-radius:20px;
+  max-width: 300px;
+  min-width: 210px;
+  height: 225px;
+  padding-top: 10px;
+  overflow-x:auto;
+}
+.commit-grid{
+  display:grid;
+  grid-auto-flow: column;
+}
+
+
+/* BUTTONS AND LINKS: */
+.b-font{
+  font-family: monospace;
+  margin-top: 15px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.b-font:hover{
+  color:green;
+}
+.link-style{
+  text-decoration: none;
+  color: black;
+}
+.link-style-green{
+  text-decoration: none;
+  color: green;
+}
+.link-style-green:hover{
+  text-decoration: none;
+  color: lightgreen;
+}
+
+
+/* ICONS: */
+.double{
+  font-size: 4.5em;
+  color: lightgreen;
+}
+.single{
+  font-size: 8.1em;
+  color: lightgrey;
+}
+.mode-icons{
+  font-size:2em;
+  height: 20px;
+}
+.icon{
+  border-width: 1px;
+}
+
+
+/* MISC: */
+.large{
+  font-size: 1.5em;
+}
+.completed{
+  color: green;
+}
+.in_progress{
+  color: orange;
+}
+.bold{
+  font-weight: bold;
+}
+.small-bold{
+  font-weight: bolder;
+}
+
+
+/* ERROR PAGE: */
+.error-outer{
+  display: flex;
+  justify-content:center;
+  margin-bottom: 75px;
+  padding: 30px;
+}
+.error{
+  text-align: center;
+  padding-top:100px;
+}
+.e{
+  padding-bottom:500px;
+  padding-top: 100px;
+}
+
+
+/* NIGHT/DAY MODE: */
+.day{
+  filter: invert(0%);
+}
+.night{
+  flex-direction: row;
+  filter: invert(100%);
+  color:lightgrey;
+  background-color: white;
+}
+.night body{
+  color:lightgrey;
+}
+.night .b-grey{
+  border: 1px solid lightgrey
+}
+.night h2{
+  color:lightgrey;
+}
+.night .b-font{
+  color:lightgrey;
+  background-color: white;
+  border-color: lightgrey;
+}
+.night .b-font:hover{
+  color:black;
+  background-color: white;
+  border-color: black;
+}
+.night .commit-border{
+  border-color: lightgreen;
+}
+.night .link-style-green{
+  color: lightgreen;
+}
+.night .link-style-green:hover{
+  color: #CC00CC;
+}
+.night .link-style{
+  color:lightgrey;
+}
+.night .link-style:hover{
+  color:black;
+}
+.day .link-style:hover{
+  color: green;
+}
+.night .completed{
+  color: #CC00CC;
+}
+.night .in_progress{
+  color: #00c3ff;
+}
+.night .search-bar{
+  color:black;
+  font-family: monospace;
+  margin-top: 15px;
+  cursor: pointer;
+}
+.night ::-webkit-scrollbar-thumb {
+  background-color: lightgreen;
+  border-radius: 10px;
+}
+.night ::-webkit-scrollbar-thumb {
+  -webkit-box-shadow: inset 0 0 5px lightgreen;
+}
+::-webkit-scrollbar-track {
+  background-color: lightgrey;
+  box-shadow: 0 0 3px white;
+  border-radius: 10px;
+}
+
+
+
+/*  SEARCH PAGE ARROWS: */
+.search-page-arrows{
+  padding-top: 8px;
+  max-height: 578px;
+  overflow-y: hidden;
+}
+
+
+
+
+/* ~~~~~~~~~~~~~~ ANIMATIONS ~~~~~~~~~~~~~~~~~~ */
+
+.lookup{
+  animation-name: slidein;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+}
+
+.dot1{
+  color: white;
+  animation: pulse 0.5s 0.75s infinite linear;
+  animation-iteration-count: 1;
+  align-self: flex-end;
+}
+
+.dot2{
+  color: white;
+  animation: pulse 0.5s 1.15s infinite linear;
+  animation-iteration-count: 1;
+  align-self:flex-end;
+}
+
+.dot3{
+  color: white;
+  animation: pulse 0.5s 1.5s infinite linear;
+  animation-iteration-count: 1;
+  align-self: flex-end;
+}
+
+.arrow1{
+  animation: pulse-green 0.5s 3.25s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.arrow2{
+  animation: pulse-green 0.5s 3.35s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.arrow3{
+  animation: pulse-green 0.5s 3.45s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.arrow4{
+  animation: pulse-green 0.5s 3.55s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.arrow5{
+  animation: pulse-green 0.5s 3.65s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.arrow6{
+  animation: pulse-green 0.5s 3.75s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.arrow7{
+  animation: pulse-green 0.5s 3.85s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.flash2{
+  color:black;
+  animation: pulse2 1s 0.5s infinite linear;
+  animation-iteration-count: 2;
+}
+
+.flash2-delay{
+  color:black;
+  animation: pulse2 0.5s 2.5s infinite linear;
+  animation-iteration-count: 1;
+}
+
+.spin{
+  animation: colour-out 1s infinite ease-out;
+  animation-iteration-count: 1;
+}
+
+.spin:hover{
+  animation: colour 1s infinite ease-in;
+  animation-iteration-count: 1;
+}
+
+:root{
+  --random-degree: 360deg;
+}
+
+@keyframes colour-out{
+  0% {
+    color:green;
+    transform:rotate(var(0deg));
+  }
+  50% {
+    color:green;
+  }
+  75% {
+    color:green;
+  }
+  100% {
+    color:lightgrey;
+    transform:rotate(var(--random-degree));
+  }
+}
+
+@keyframes colour{
+  0% {
+    color:lightgrey;
+  }
+  3% {
+      color:green;
+    }
+  50% {
+    color:green;
+  }
+  95%{
+    color:green;
+  }
+  100%{
+    color:green;
+  }
+}
+
+@keyframes slidein {
+  from {
+    margin-left: 63%;
+    width: 300%;
+  }
+  to {
+    margin-left: 0%;
+    width: 100%;
+  }
+}
+
+@keyframes pulse{
+  0% {
+    color:white;
+  }
+  25%{
+    color:black;
+  }
+}
+
+@keyframes pulse2{
+  0% {
+    color:black;
+  }
+  25%{
+    color:white;
+  }
+}
+
+@keyframes pulse-green{
+  0% {
+    color:lightgreen;
+  }
+  25%{
+    color:white;
+  }
+}
+
+
+
+
+/* ~~~~~~~~~~~~~ SCROLLBARS: ~~~~~~~~~~~~~ */
+
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+  border: 3px solid white;
+}
+
+#style-1::-webkit-scrollbar-track
+{
+	border-radius: 10px;
+  background-color: white;
+	-webkit-box-shadow: inset 0 0 5px white;
+}
+
+#style-1::-webkit-scrollbar
+{
+	width: 3px;
+  background-color: white;
+}
+
+#style-1::-webkit-scrollbar-thumb
+{
+	border-radius: 10px;
+  background-color: white;
+  -webkit-box-shadow: inset 0 0 5px white;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 5px white;
+  margin-left: 30px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 5px rgb(70, 7, 44);
+}
+
+/* width */
+*::-webkit-scrollbar {
+  width: 3px;
+}
+
+/* Track */
+*::-webkit-scrollbar-track {
+  background: white;
+}
+
+/* Handle */
+*::-webkit-scrollbar-thumb {
+  background: white;
+}
+
+/* Handle on hover */
+*::-webkit-scrollbar-thumb:hover {
+  background: white;
+}
+
+/* // scroll bar */
+/* width */
+::-webkit-scrollbar {
+  background-color: white;
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background-color: white;
+  box-shadow: 0 0 3px white;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background-color: purple;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: white;
+}
