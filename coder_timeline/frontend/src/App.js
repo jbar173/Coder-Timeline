@@ -12,6 +12,7 @@ import CreateEvent from "./pages/create.js";
 import { FaLightbulb } from 'react-icons/fa';
 
 
+
 class App extends React.Component {
     constructor(props){
     super(props);

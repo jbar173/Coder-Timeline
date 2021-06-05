@@ -1,8 +1,13 @@
 import React from 'react';
 import '../App.css';
-import { FaAngleUp, FaAngleDown, FaAngleRight, FaAngleLeft, FaAngleDoubleDown, FaAngleDoubleUp } from 'react-icons/fa';
+import { FaAngleUp, FaAngleDown, FaAngleRight, FaAngleLeft,
+  FaAngleDoubleDown, FaAngleDoubleUp } from 'react-icons/fa';
 
 
+// ARROW ANIMATION COMPONENTS
+
+
+// Search.js and Timeline.js scroll arrows:
 
 class ArrowsDown extends React.Component {
     render() {
@@ -18,8 +23,6 @@ class ArrowsDown extends React.Component {
         );
     }
 }
-
-
 
 class ArrowsUp extends React.Component {
     render() {
@@ -37,12 +40,12 @@ class ArrowsUp extends React.Component {
 }
 
 
+// Search.js page arrow grid:
 
 class SingleArrowUp extends React.Component{
         render(){
-          var num = Math.floor(Math.random() * 360);
           return(
-            <div>
+            <div className="spinner">
               <table>
                 <tr>
                   <td><FaAngleUp className="spin single"/></td>
@@ -53,13 +56,10 @@ class SingleArrowUp extends React.Component{
          }
     }
 
-
-
 class SingleArrowDown extends React.Component{
   constructor(props){
     super(props);
   };
-
   render(){
       return(
           <div className="spinner">
@@ -72,8 +72,6 @@ class SingleArrowDown extends React.Component{
         );
     }
   }
-
-
 
 class ArrowsGrid extends React.Component{
   constructor(props){

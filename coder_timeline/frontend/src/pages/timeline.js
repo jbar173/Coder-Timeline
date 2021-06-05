@@ -8,7 +8,16 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import { ArrowsDown, ArrowsUp } from './arrows.js';
 
+// Homepage/user's repository/projects timeline.
 
+// Fetches data from both Github (repos and commits) and DRF
+// (projects and project sections), sorts and maps into a timeline.
+
+// Fetches the user's status (fetchUserList) via Django api
+// (generic UserList view overridden).
+// If user is signed in as a superuser, component displays project create/update buttons,
+// which link to CreateEvent(create.js) and UpdateTimeline(update.js)
+// components respectively.
 
 class MyTimeline extends React.Component {
   constructor(props){
@@ -116,13 +125,12 @@ componentDidUpdate(){
         console.log("updated 2: this.state.finalTimeline.length: " + this.state.finalTimeline.length)
     }else if(this.state.finalTimeline.length === 2 && this.state.fetched === true && this.state.c_fetched === false){
         console.log("updated 3")
-        var u
         var us = this.state.user
         var current_id = us['current_id']
         console.log("current_id: " + current_id)
         this.fetchUser()
-
         this.fetchCommits()
+
         this.setState({
           c_fetched:true,
           finished_1:true
@@ -168,8 +176,7 @@ componentDidUpdate(){
       }
 }
 
-
-
+// Fetches user list, as well as current user's id(current_id):
   fetchUserList(){
     console.log("Fetching user list")
     var url = `http://127.0.0.1:8000/api/user-list/`
@@ -182,11 +189,11 @@ componentDidUpdate(){
     )
   }
 
-
-  fetchUser(){
+// Uses current_id (from fetchUserList) to gather current user data
+// (superuser or not?):
+ fetchUser(){
    console.log("Fetching user detail")
    var current_id = this.state.user.current_id
-
    if(current_id == null){
        console.log("user not authenticated")
    }else{
@@ -201,7 +208,7 @@ componentDidUpdate(){
     }
   }
 
-
+// Calls user's DRF and Github apis, returns projects and repos:
   fetchAccount(){
       console.log("Fetching account..")
       var user = this.state.username
@@ -226,79 +233,7 @@ componentDidUpdate(){
       )
     }
 
-
-  map_commits(d,l){
-    console.log("mapping commits")
-    var i
-    var h = l
-    var list = []
-    var date_order_list = []
-
-    for(i=0;i<h;i++){
-      var k
-      var q = d[i]
-      var j = q.length
-
-      for(k=0;k<j;k++){
-          var n = d[i][k]['html_url']
-          var m = d[i][k]['commit']['message']
-          var p = d[i][k]['commit']['author']['date']
-          list.push([n,m,p])
-      }
-    }
-    this.setState({
-      sorted_commits:list
-    })
-    return list
-  }
-
-
-
-  getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let i = 0; i < cookies.length; i++) {
-              const cookie = cookies[i].trim();
-              if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
-          }
-      }
-      return cookieValue;
-  }
-
-
-  fetchProjectSections(){
-    console.log("Fetching project sections...")
-    var pr = this.state.finalTimeline
-    var projects = pr.flat()
-    var length = projects.length
-    var i
-    var p_ps_list = []
-
-    for(i=0;i<length;i++){
-      var proj = projects[i]
-      var proj_id = proj.id
-      if(!proj.commits_url){
-        var url = `http://127.0.0.1:8000/api/ps-list/${proj_id}`
-        fetch(url)
-        .then(response => response.json())
-        .then(data =>
-          p_ps_list.push(data)
-        )
-        }
-      else{
-        console.log("Is Github repo")
-      }
-      }
-    this.setState({
-      projectSectionList:p_ps_list
-    })
-  }
-
-
+// Calls the commit api for each Github repo:
   fetchCommits(){
     var x = this.state.finalTimeline
     var flat = x.flat()
@@ -339,7 +274,80 @@ componentDidUpdate(){
     }
   }
 
+// Takes relevant data for each commit,
+// groups data together to be mapped:
+  map_commits(d,l){
+    console.log("mapping commits")
+    var i
+    var h = l
+    var list = []
+    var date_order_list = []
 
+    for(i=0;i<h;i++){
+      var k
+      var q = d[i]
+      var j = q.length
+
+      for(k=0;k<j;k++){
+          var n = d[i][k]['html_url']
+          var m = d[i][k]['commit']['message']
+          var p = d[i][k]['commit']['author']['date']
+          list.push([n,m,p])
+      }
+    }
+    this.setState({
+      sorted_commits:list
+    })
+    return list
+  }
+
+
+  getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+
+// Gathers each project's sections from DRF api:
+  fetchProjectSections(){
+    console.log("Fetching project sections...")
+    var pr = this.state.finalTimeline
+    var projects = pr.flat()
+    var length = projects.length
+    var i
+    var p_ps_list = []
+
+    for(i=0;i<length;i++){
+      var proj = projects[i]
+      var proj_id = proj.id
+      if(!proj.commits_url){
+        var url = `http://127.0.0.1:8000/api/ps-list/${proj_id}`
+        fetch(url)
+        .then(response => response.json())
+        .then(data =>
+          p_ps_list.push(data)
+        )
+        }
+      else{
+        console.log("Is Github repo")
+      }
+      }
+    this.setState({
+      projectSectionList:p_ps_list
+    })
+  }
+
+// Filters out commits that don't belong to repo currently
+// being mapped, before mapping them:
   which_repo(commit,repo){
     console.log("which repo?")
     var html = commit[0]
@@ -352,7 +360,7 @@ componentDidUpdate(){
     }
   }
 
-
+// As above but filters project sections for mapped projects:
   which_project(section,project){
     if(this.state.expanded !== -1){
       console.log("which project?")
@@ -379,7 +387,7 @@ componentDidUpdate(){
     return 0;
   }
 
-
+// Uses function above to sort timeline chronologically:
   sort_dates(list){
     var mylist = list.flat()
     var final_list = []
@@ -403,7 +411,7 @@ componentDidUpdate(){
     return sorted;
   }
 
-
+// Reveals list of commits/project_sections for repo/project clicked on (click event):
   handleExpand(e){
     e.stopPropagation()
     var x = this.state.expanded
@@ -428,6 +436,7 @@ componentDidUpdate(){
     }
   }
 
+// Reveals further commit/project_section details:
   see_details(){
     console.log("this.state.details: " + this.state.details)
     var x = !this.state.details
@@ -437,7 +446,8 @@ componentDidUpdate(){
     })
   }
 
-
+// Sets scroll state (this.state.direction), which affects arrows
+// at the left of the page:
   listenScrollEvent(e) {
     var r = this.navBarTopRef.current.getBoundingClientRect()
     var rect = r.top
@@ -485,7 +495,9 @@ componentDidUpdate(){
     var project_s = this.state.projectSectionList
     var project_sections = project_s.flat()
 
-
+// Lines 503-778: superuser === true.
+// Lines 779-1033: superuser === false (identical to above,
+//   but includes project create/update link buttons).
 
     return(
       <div>
@@ -784,248 +796,253 @@ componentDidUpdate(){
 
                   <div className="centre">
                     <div className="outer-bubble" id="wrapper">
-                      <div id="wrapper">
-                        <div>
-                            <div className="user" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-                                <h2><h2 style={{cursor:"pointer"}} className="body flash2-delay link-style">Start</h2></h2>
-                            </div>
-                            {this.state.direction === "scrolling up" ?
-                                (
-                                  <div className="arrows">
-                                      <ArrowsUp />
-                                  </div>
-                                )
-                                :
-                                (
-                                  <div className="arrows">
-                                      <ArrowsDown />
-                                  </div>
-                                )
-                             }
-                            <div className="end" onClick={() => window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'})}>
-                                <h2><h2 style={{paddingTop:"40px",cursor:"pointer"}} className="body flash2-delay link-style">End</h2></h2>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          {x.reverse().map(function(item,index) {
-                            return(
-                              <div className="green-bubble">
-                                    <div key={item.id}>
-                                        <h3>{item.name}</h3>
-                                        <p>Description: {item.description}</p>
-                                        <p>Started: <Moment format="LL">{item.created_at}</Moment></p>
-                                    </div>
 
-                                    <div>
-                                        {expanded === -1 ?
-                                          (
-                                            <div>
-                                                {item.commits_url ?
-                                                    (
-                                                      <div>
-                                                        <button className="b-font" type="button" onClick={self.handleExpand}
-                                                        value={expand} name={item.id} >See commits</button>
-                                                      </div>
-                                                    )
-                                                    :
-                                                    (
-                                                      <div>
-                                                        <div>
-                                                          <p>Sections: {item.sections}</p>
-                                                        </div>
-                                                        <div>
-                                                            {item.sections === 0 ?
-                                                              (
-                                                                <div>
-                                                                    <br></br>
-                                                                </div>
-                                                              )
-                                                              :
-                                                              (
-                                                                <div>
-                                                                  <button className="b-font" type="button" onClick={self.handleExpand}
-                                                                  value={expand} name={item.id} >See sections</button>
-                                                                </div>
-                                                              )
-                                                            }
-                                                        </div>
-                                                      </div>
-                                                    )
-                                                }
-                                            </div>
-                                          )
-                                          :
-                                          (
-                                            <div>
-                                                {expanded == item.id ?
-                                                  (
-                                                      <div>
-                                                        {item.commits_url ?
+
+                             <div id="wrapper">
+                               <div>
+                                  <div className="user" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+                                      <h2><h2 style={{cursor:"pointer"}} className="body flash2-delay link-style">Start</h2></h2>
+                                  </div>
+                                  {this.state.direction === "scrolling up" ?
+                                      (
+                                        <div className="arrows">
+                                            <ArrowsUp />
+                                        </div>
+                                      )
+                                      :
+                                      (
+                                        <div className="arrows">
+                                            <ArrowsDown />
+                                        </div>
+                                      )
+                                   }
+                                   <div className="end" onClick={() => window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'})}>
+                                       <h2><h2 style={{paddingTop:"40px",cursor:"pointer"}} className="body flash2-delay link-style">End</h2></h2>
+                                   </div>
+                                </div>
+                              </div>
+                              <div>
+                                {x.reverse().map(function(item,index) {
+                                  return(
+                                    <div className="green-bubble">
+                                          <div key={item.id}>
+                                              <h3>{item.name}</h3>
+                                              <p>Description: {item.description}</p>
+                                              <p>Started: <Moment format="LL">{item.created_at}</Moment></p>
+                                          </div>
+
+                                          <div>
+                                              {expanded === -1 ?
+                                                (
+                                                  <div>
+                                                      {item.commits_url ?
                                                           (
                                                             <div>
+                                                              <button className="b-font" type="button" onClick={self.handleExpand}
+                                                              value={expand} name={item.id} >See commits</button>
+                                                            </div>
+                                                          )
+                                                          :
+                                                          (
+                                                            <div>
+                                                              <div>
+                                                                <p>Sections: {item.sections}</p>
+                                                              </div>
+                                                              <div>
+                                                                  {item.sections === 0 ?
+                                                                    (
+                                                                      <div>
+                                                                          <br></br>
+                                                                      </div>
+                                                                    )
+                                                                    :
+                                                                    (
+                                                                      <div>
+                                                                        <button className="b-font" type="button" onClick={self.handleExpand}
+                                                                        value={expand} name={item.id} >See sections</button>
+                                                                      </div>
+                                                                    )
+                                                                  }
+                                                              </div>
+                                                            </div>
+                                                          )
+                                                      }
+                                                  </div>
+                                                )
+                                                :
+                                                (
+                                                  <div>
+                                                      {expanded == item.id ?
+                                                        (
+                                                            <div>
+                                                              {item.commits_url ?
+                                                                (
                                                                   <div>
-                                                                    {details === false ?
+                                                                        <div>
+                                                                          {details === false ?
+                                                                                (
+                                                                                  <div>
+                                                                                    <h4>Commits:</h4>
+                                                                                      <div className="collapsed">
+                                                                                        <div id="wrapper">
+                                                                                          <div className="inner-column" style={{width:"300px"}}>
+                                                                                            {sorted_commits.filter(commit_data => self.which_repo(commit_data,item)).reverse().map(function(commit_data,num){
+                                                                                                 return(
+                                                                                                      <div>
+                                                                                                        <h5>{num +1}. '{commit_data[1]}'</h5>
+                                                                                                      </div>
+                                                                                                    )
+                                                                                             })}
+                                                                                          </div>
+                                                                                        </div>
+                                                                                      </div>
+                                                                                      <div>
+                                                                                        <button className="b-font" type="button" onClick={() => self.see_details()}>See details</button>
+                                                                                        <p>- - - -</p>
+                                                                                      </div>
+                                                                                  </div>
+                                                                                )
+                                                                                :
+                                                                                (
+                                                                                  <div>
+                                                                                      <h4>Commits:</h4>
+                                                                                      <div className="visible">
+                                                                                          <div id="wrapper" style={{width:"100px"}}>
+                                                                                              {sorted_commits.filter(commit_data => self.which_repo(commit_data,item)).reverse().map(function(commit_data,num){
+                                                                                                   return(
+                                                                                                        <div className="commit-border">
+                                                                                                          <div className="inner">
+                                                                                                              <h5>{num +1}. '{commit_data[1]}'</h5>
+                                                                                                              <h5>Commit message: {commit_data[1]}</h5>
+                                                                                                              <h5>Committed:</h5>
+                                                                                                              <Moment format="LLL">{commit_data[2]}</Moment>
+                                                                                                              <h5><Link className="link-style-green" to={{ pathname: `${commit_data[0]}` }} target="_blank" >Go to commit on Github.com</Link></h5>
+                                                                                                          </div>
+                                                                                                        </div>
+                                                                                                      )
+                                                                                                })}
+                                                                                          </div>
+                                                                                      </div>
+                                                                                      <div>
+                                                                                        <button className="b-font" type="button" onClick={() => self.see_details()}>Hide details</button>
+                                                                                      </div>
+                                                                                  </div>
+                                                                                )
+                                                                          }
+                                                                        </div>
+                                                                        <div>
+                                                                            <button className="b-font" type="button" onClick={self.handleExpand}
+                                                                              value={collapse} name={item.id} >Hide commits</button>
+                                                                        </div>
+
+                                                                  </div>
+                                                                )
+                                                                :
+                                                                (
+                                                                  <div>
+                                                                      <div>
+                                                                        {details === false ?
                                                                           (
                                                                             <div>
-                                                                              <h4>Commits:</h4>
+                                                                              <h4>Project sections:</h4>
                                                                                 <div className="collapsed">
                                                                                   <div id="wrapper">
                                                                                     <div className="inner-column" style={{width:"300px"}}>
-                                                                                      {sorted_commits.filter(commit_data => self.which_repo(commit_data,item)).reverse().map(function(commit_data,num){
-                                                                                           return(
-                                                                                                <div>
-                                                                                                  <h5>{num +1}. '{commit_data[1]}'</h5>
-                                                                                                </div>
-                                                                                              )
-                                                                                       })}
+                                                                                      {project_sections.filter(project_section => self.which_project(project_section,item)).map(function(project_section,ind){
+                                                                                        return(
+                                                                                            <div>
+                                                                                              <h5>{ind +1}. {project_section.name}</h5>
+                                                                                            </div>
+                                                                                          )}
+                                                                                        )}
                                                                                     </div>
                                                                                   </div>
                                                                                 </div>
                                                                                 <div>
                                                                                   <button className="b-font" type="button" onClick={() => self.see_details()}>See details</button>
-                                                                                  <p>- - - -</p>
                                                                                 </div>
                                                                             </div>
                                                                           )
                                                                           :
                                                                           (
                                                                             <div>
-                                                                                <h4>Commits:</h4>
+                                                                                <h4>Project sections:</h4>
                                                                                 <div className="visible">
                                                                                     <div id="wrapper" style={{width:"100px"}}>
-                                                                                        {sorted_commits.filter(commit_data => self.which_repo(commit_data,item)).reverse().map(function(commit_data,num){
-                                                                                             return(
-                                                                                                  <div className="commit-border">
-                                                                                                    <div className="inner">
-                                                                                                        <h5>{num +1}. '{commit_data[1]}'</h5>
-                                                                                                        <h5>Commit message: {commit_data[1]}</h5>
-                                                                                                        <h5>Committed:</h5>
-                                                                                                        <Moment format="LLL">{commit_data[2]}</Moment>
-                                                                                                        <h5><Link className="link-style-green" to={{ pathname: `${commit_data[0]}` }} target="_blank" >Go to commit on Github.com</Link></h5>
-                                                                                                    </div>
-                                                                                                  </div>
-                                                                                                )
-                                                                                          })}
+                                                                                        {project_sections.filter(project_section => self.which_project(project_section,item)).map(function(project_section,ind){
+                                                                                          return(
+                                                                                            <div className="commit-border">
+                                                                                              <div className="inner">
+                                                                                                  <h5>{ind +1}. {project_section.name}</h5>
+                                                                                                  <h5>{project_section.date}</h5>
+                                                                                                  {project_section.completed === true ?
+                                                                                                    (<h5 className="completed">Completed</h5>)
+                                                                                                    :
+                                                                                                    (<h5 className="in_progress">In progress</h5>)
+                                                                                                  }
+                                                                                              </div>
+                                                                                            </div>
+                                                                                           )}
+                                                                                         )}
                                                                                     </div>
                                                                                 </div>
                                                                                 <div>
-                                                                                  <button className="b-font" type="button" onClick={() => self.see_details()}>Hide details</button>
+                                                                                    <button className="b-font" type="button" onClick={() => self.see_details()}>Hide details</button>
                                                                                 </div>
                                                                             </div>
                                                                           )
-                                                                    }
+                                                                        }
+                                                                      </div>
+                                                                      <div>
+                                                                          <button className="b-font" type="button" onClick={self.handleExpand}
+                                                                          value={collapse} name={item.id} >Hide sections</button>
+                                                                      </div>
                                                                   </div>
-                                                                  <div>
-                                                                      <button className="b-font" type="button" onClick={self.handleExpand}
-                                                                        value={collapse} name={item.id} >Hide commits</button>
-                                                                  </div>
+                                                                )
+                                                              }
+                                                           </div>
+                                                         )
+                                                         :
+                                                         (
+                                                           <div>
+                                                               {item.commits_url ?
+                                                                   (
+                                                                     <div>
+                                                                       <button className="b-font" type="button" onClick={self.handleExpand}
+                                                                       value={expand} name={item.id} >See commits</button>
+                                                                     </div>
+                                                                   )
+                                                                   :
+                                                                   (
+                                                                     <div>
+                                                                       <button className="b-font" type="button" onClick={self.handleExpand}
+                                                                       value={expand} name={item.id} >See sections</button>
+                                                                     </div>
+                                                                   )
+                                                               }
+                                                           </div>
+                                                         )
+                                                      }
+                                                  </div>
+                                                )
+                                              }
+                                          </div>
+                                     </div>
+                                   )
+                                 }
+                              )}
+                        </div>
 
-                                                            </div>
-                                                          )
-                                                          :
-                                                          (
-                                                            <div>
-                                                                <div>
-                                                                  {details === false ?
-                                                                    (
-                                                                      <div>
-                                                                        <h4>Project sections:</h4>
-                                                                          <div className="collapsed">
-                                                                            <div id="wrapper">
-                                                                              <div className="inner-column" style={{width:"300px"}}>
-                                                                                {project_sections.filter(project_section => self.which_project(project_section,item)).map(function(project_section,ind){
-                                                                                  return(
-                                                                                      <div>
-                                                                                        <h5>{ind +1}. {project_section.name}</h5>
-                                                                                      </div>
-                                                                                    )}
-                                                                                  )}
-                                                                              </div>
-                                                                            </div>
-                                                                          </div>
-                                                                          <div>
-                                                                            <button className="b-font" type="button" onClick={() => self.see_details()}>See details</button>
-                                                                          </div>
-                                                                      </div>
-                                                                    )
-                                                                    :
-                                                                    (
-                                                                      <div>
-                                                                          <h4>Project sections:</h4>
-                                                                          <div className="visible">
-                                                                              <div id="wrapper" style={{width:"100px"}}>
-                                                                                  {project_sections.filter(project_section => self.which_project(project_section,item)).map(function(project_section,ind){
-                                                                                    return(
-                                                                                      <div className="commit-border">
-                                                                                        <div className="inner">
-                                                                                            <h5>{ind +1}. {project_section.name}</h5>
-                                                                                            <h5>{project_section.date}</h5>
-                                                                                            {project_section.completed === true ?
-                                                                                              (<h5 className="completed">Completed</h5>)
-                                                                                              :
-                                                                                              (<h5 className="in_progress">In progress</h5>)
-                                                                                            }
-                                                                                        </div>
-                                                                                      </div>
-                                                                                     )}
-                                                                                   )}
-                                                                              </div>
-                                                                          </div>
-                                                                          <div>
-                                                                              <button className="b-font" type="button" onClick={() => self.see_details()}>Hide details</button>
-                                                                          </div>
-                                                                      </div>
-                                                                    )
-                                                                  }
-                                                                </div>
-                                                                <div>
-                                                                    <button className="b-font" type="button" onClick={self.handleExpand}
-                                                                    value={collapse} name={item.id} >Hide sections</button>
-                                                                </div>
-                                                            </div>
-                                                          )
-                                                        }
-                                                     </div>
-                                                   )
-                                                   :
-                                                   (
-                                                     <div>
-                                                         {item.commits_url ?
-                                                             (
-                                                               <div>
-                                                                 <button className="b-font" type="button" onClick={self.handleExpand}
-                                                                 value={expand} name={item.id} >See commits</button>
-                                                               </div>
-                                                             )
-                                                             :
-                                                             (
-                                                               <div>
-                                                                 <button className="b-font" type="button" onClick={self.handleExpand}
-                                                                 value={expand} name={item.id} >See sections</button>
-                                                               </div>
-                                                             )
-                                                         }
-                                                     </div>
-                                                   )
-                                                }
-                                           </div>
-                                          )
-                                        }
-                                    </div>
-                              </div>
-                            )
-                          }
-                       )}
-                  </div>
+                </div>
               </div>
-            </div>
-          )
+
+
+         )
         </div>
        )
       }
     </div>
-    )
+   )
   }
 }
 

@@ -7,6 +7,8 @@ import Moment from 'react-moment';
 import moment from 'moment';
 
 
+// Project update page:
+
 class UpdateTimeline extends React.Component {
   constructor(props){
     super(props);
@@ -71,7 +73,6 @@ class UpdateTimeline extends React.Component {
 
   abortController = new AbortController()
 
-
   componentWillUnmount(){
   this.abortController.abort()
   }
@@ -130,6 +131,7 @@ class UpdateTimeline extends React.Component {
     }
     if(this.state.ps_deleted === true || this.state.ps_added === true){
       this.fetchProjectUpdate()
+      // ^ updates the 'sections' attribute of the project
       this.setState({
         ps_deleted:false,
         ps_added:false,
@@ -318,36 +320,8 @@ class UpdateTimeline extends React.Component {
   }
 
 
-  editingPs(section){
-    var new_state = !this.state.editing_ps
-    if(section !== 0){
-      if(section.completed === true){
-      this.setState({
-        editing_ps:new_state,
-        activeProjectSection:section,
-        checked:true
-      })
-      }else{
-        this.setState({
-          editing_ps:new_state,
-          activeProjectSection:section,
-          checked:false
-        })
-      }
-    }else{
-      this.setState({
-        editing_ps:new_state,
-        new_s: true,
-        checked:false
-      })
-     }
-    console.log("editing ps")
-  }
-
-
 
 // project section editing functions:
-
 
   handleNameChange(e){
     console.log("handling name change")
@@ -437,7 +411,6 @@ class UpdateTimeline extends React.Component {
         ).catch(function(error){
           console.log("ERROR:", error)
         })
-
     }else{
         console.log("id not null")
         var x = this.state.activeProjectSection.id
@@ -471,6 +444,35 @@ class UpdateTimeline extends React.Component {
     }
   }
 
+// click function, toggles view between editing and
+// not editing the project section:
+  editingPs(section){
+    var new_state = !this.state.editing_ps
+    if(section !== 0){
+      if(section.completed === true){
+      this.setState({
+        editing_ps:new_state,
+        activeProjectSection:section,
+        checked:true
+      })
+      }else{
+        this.setState({
+          editing_ps:new_state,
+          activeProjectSection:section,
+          checked:false
+        })
+      }
+    }else{
+      this.setState({
+        editing_ps:new_state,
+        new_s: true,
+        checked:false
+      })
+     }
+    console.log("editing ps")
+  }
+
+// clears all current data from project section's edit form:
   clear(){
     this.setState({
       editing_ps:false,
@@ -489,13 +491,12 @@ class UpdateTimeline extends React.Component {
 
 
 
-
-
   render(){
     var self = this
     var account = this.state.activeAccount
     var project = this.state.activeProject
     var project_sections = this.state.projectSectionList
+
     var editing_pr = this.state.editing_proj
     var editing_prs = this.state.editing_ps
     var new_s = this.state.new_s

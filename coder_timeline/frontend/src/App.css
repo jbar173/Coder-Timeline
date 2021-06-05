@@ -313,6 +313,7 @@ body{
   padding-top: 8px;
   max-height: 578px;
   overflow-y: hidden;
+  overflow-x: hidden;
 }
 
 

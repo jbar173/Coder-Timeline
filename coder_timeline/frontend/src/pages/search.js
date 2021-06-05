@@ -8,6 +8,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 
 
+// Github user search page.
 
 class UserSearch extends React.Component {
   constructor(props){
@@ -90,6 +91,8 @@ componentDidUpdate(){
 }
 
 
+// Sets scroll state (this.state.direction), which affects arrows
+// at the left of the page:
 listenScrollEvent(e) {
   var r = this.navBarTopRef.current.getBoundingClientRect()
   var rect = r.top
@@ -131,7 +134,7 @@ getCookie(name) {
     return cookieValue;
 }
 
-
+// Calls Github's user repo api for typed user, returns user's repos:
 fetchAccount(){
   console.log("Fetching account..")
   var user = this.state.username
@@ -148,7 +151,7 @@ fetchAccount(){
     })
 }
 
-
+// Calls the commit api for each Github repo:
 fetchCommits(){
   console.log("Fetching commits..")
   var x = this.state.user_data.length
@@ -178,6 +181,8 @@ fetchCommits(){
   })
 }
 
+
+// Event handlers/functions for navbar:
 handleChange(e){
   var value = e.target.value
   this.setState({
@@ -187,11 +192,9 @@ handleChange(e){
   console.log("username: " + this.state.username)
 }
 
-
 searchUser(e){
   this.fetchAccount();
 }
-
 
 clearPage(){
   console.log("clear")
@@ -206,6 +209,7 @@ clearPage(){
 }
 
 
+// Reveals list of commits for repo clicked on (click event):
 handleExpand(e){
   e.stopPropagation()
   var x = this.state.expanded_3
@@ -232,7 +236,8 @@ handleExpand(e){
   }
 }
 
-
+// Takes relevant data for each commit,
+// groups data together to be mapped:
 map_commits(d,l){
   var i
   var h = l
@@ -257,6 +262,8 @@ map_commits(d,l){
 }
 
 
+// Filters out commits that don't belong to repo currently
+// being mapped, before mapping them:
 which_repo(commit,repo){
   var html = commit[0]
   var repo_name = repo.name
@@ -269,6 +276,7 @@ which_repo(commit,repo){
 }
 
 
+// Reveals further commit details:
 see_details(){
   console.log("this.state.details: " + this.state.details)
   var x = !this.state.details
@@ -286,9 +294,11 @@ see_details(){
     var tried = this.state.tried
     var full = this.state.full
     var defined = true
+    // displays arrow grid when page first loads (user not searched for yet):
     if(this.state.user_data.length === 0){
       defined = false
     }
+    //
     var user = this.state.username
     var self = this
     var expanded = this.state.expanded
@@ -296,6 +306,11 @@ see_details(){
     var sorted_commits = this.state.sorted_commits
     var expand = "expand"
     var collapse = "collapse"
+
+// Line 314 catches error (user doesn't exist/nothing typed,
+//   but search was clicked): 319-330 is the error page layout.
+
+// Line 333 onwards displays if no errors.
 
     return(
       <div>
@@ -481,7 +496,7 @@ see_details(){
                              )
                              :
                              (
-                               <div className="container" style={{paddingBottom:"36px",paddingTop:"28px"}} >
+                               <div style={{paddingBottom:"36px",paddingTop:"28px"}} >
                                   <ArrowsGrid/>
                                </div>
                              )

@@ -19,6 +19,10 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="index.html")),
+    path('search/', TemplateView.as_view(template_name="index.html")),
+    path('update/', TemplateView.as_view(template_name="index.html")),
+    path('create/', TemplateView.as_view(template_name="index.html")),
+    path('timeline/', TemplateView.as_view(template_name="index.html")),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('api-auth/', include('rest_framework.urls')),

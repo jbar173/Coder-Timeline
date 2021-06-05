@@ -7,6 +7,8 @@ import Moment from 'react-moment';
 import moment from 'moment';
 
 
+// New project creation page:
+
 class CreateEvent extends React.Component {
   constructor(props){
     super(props);
@@ -87,7 +89,7 @@ class CreateEvent extends React.Component {
  abortController = new AbortController()
 
 
-  componentDidMount(){
+ componentDidMount(){
     console.log("mounted")
     if(this.state.activeAccount.id === null){
       try{
@@ -99,22 +101,44 @@ class CreateEvent extends React.Component {
         this.fetchDrfAccount()
       }
     }
-  }
+ }
+
+ componentWillUnmount(){
+   this.abortController.abort()
+ }
+
+ componentDidUpdate(){
+   console.log("did update")
+   if(this.state.updated === true && this.state.updated_2 === false  && this.state.final === false){
+     console.log("updated 1")
+   }else if(this.state.updated === true && this.state.updated_2 === true){
+     console.log("updated 2")
+     var x = this.state.new_project.id
+     this.fetchProjectUpdate()
+     this.setState({
+       updated_2:false,
+     })
+   }else if(this.state.final === true){
+     console.log("updated final")
+     var x = this.state.new_project.id
+     this.fetchProjectSections()
+     this.setState({
+       final:false,
+       project_id:x
+     })
+   }else{
+     console.log("updated else")
+   }
+ }
 
 
-
-// Logic:
-
-//    1. Create main Project :                      handleSubmit()
-//    2. Create new Project Section:                handleSectionSubmit()
-//    3. Update Main Project 'sections' att:        fetchProjectUpdate()
-//    4. Fetch Project Sections, store in ps_list:  fetchProjectSections()
-//    5. Map Project Sections (ps_list) underneath main Project details.
-
-
-  componentWillUnmount(){
-  this.abortController.abort()
-  }
+//   1. To create a new Project :                               handleSubmit()
+//   2. To create a new Project Section:                        handleSectionSubmit()
+//   3. Updates the main Project's 'sections' attribute
+//        (called each time project section is added):          fetchProjectUpdate()
+//   4. Fetches Project Sections, stores in ps_list:            fetchProjectSections()
+//   5. When rendering, maps Project Sections (ps_list)
+//        underneath main Project details.
 
 
   getCookie(name) {
@@ -131,10 +155,11 @@ class CreateEvent extends React.Component {
           }
       }
       return cookieValue;
-  }
+   }
 
-
-  fetchDrfAccount(){
+// If account id isn't carried over in state (componentDidMount),
+// function will fetch account from hardcoded username:
+ fetchDrfAccount(){
     console.log("Fetching drf account..")
     var account = this.state.username
     var url = `http://127.0.0.1:8000/api/account-detail/${account}/`
@@ -143,29 +168,25 @@ class CreateEvent extends React.Component {
     .then(data =>
       this.setState({
         activeAccount:data,
-        updated:true
       })
     )
   }
 
 
-
-// Main Project's atts:
-
-  handleTitleChange(e){
-    console.log("Handling title change")
-    e.stopPropagation()
-    var account = this.state.activeAccount.id
-    var value = e.target.value
-    this.setState({
-      new_project:{
-        ...this.state.new_project,
-        name:value,
-        account:account
-        }
-    })
-  }
-
+// MAIN PROJECT'S create form event handlers/functions:
+ handleTitleChange(e){
+   console.log("Handling title change")
+   e.stopPropagation()
+   var account = this.state.activeAccount.id
+   var value = e.target.value
+   this.setState({
+     new_project:{
+       ...this.state.new_project,
+       name:value,
+       account:account
+      }
+   })
+ }
 
   handleDescriptionChange(e){
     console.log("Handling description change")
@@ -179,7 +200,6 @@ class CreateEvent extends React.Component {
     })
   }
 
-
   handleDateChange(e){
     console.log("Handling date change")
     e.stopPropagation()
@@ -191,7 +211,6 @@ class CreateEvent extends React.Component {
       }
     })
   }
-
 
   handleSubmit(e){
     console.log("Handling submit")
@@ -228,15 +247,15 @@ class CreateEvent extends React.Component {
         })
       }
   }
+//
 
 
+// Called each time a project section is added:
   fetchProjectUpdate(){
     var csrftoken = this.getCookie('csrftoken')
-
     var x = this.state.new_project.id
     var y = this.state.new_project.sections
     var url = `http://127.0.0.1:8000/api/update-project/${x}/`
-
     fetch(url, {
       signal : this.abortController.signal,
       method:'POST',
@@ -266,42 +285,41 @@ class CreateEvent extends React.Component {
   }
 
 
-  fetchProjectDelete(){
-    var csrftoken = this.getCookie('csrftoken')
-    var id = this.state.new_project.id
-    var url = `http://127.0.0.1:8000/api/delete-project/${id}/`
+fetchProjectDelete(){
+  var csrftoken = this.getCookie('csrftoken')
+  var id = this.state.new_project.id
+  var url = `http://127.0.0.1:8000/api/delete-project/${id}/`
+  fetch(url, {
+    signal : this.abortController.signal,
+    method: 'DELETE',
+    headers:{
+        'Content-type':'application/json',
+        'X-CSRFToken':csrftoken,
+    },
+  }).then(response => response.json)
+    .then(data =>
+      this.setState({
+        updated:false,
+        new_project:{
+          'id':null,
+          'account':'',
+          'name':'',
+          'description':'',
+          'created_at':'',
+          'sections':0
+        },
+      })
+    )
+  }
 
-    fetch(url, {
-      signal : this.abortController.signal,
-      method: 'DELETE',
-      headers:{
-          'Content-type':'application/json',
-          'X-CSRFToken':csrftoken,
-      },
-    }).then(response => response.json)
-      .then(data =>
-        this.setState({
-          updated:false,
-          new_project:{
-            'id':null,
-            'account':'',
-            'name':'',
-            'description':'',
-            'created_at':'',
-            'sections':0
-          },
-        })
-      )
-    }
-
-
-  edit(){
+// click function, toggles view between editing and
+// not editing the main project:
+ edit(){
     var new_state = !this.state.editing
     this.setState({
       editing:new_state
     })
-  }
-
+ }
 
   handleEditSubmit(e){
     console.log("Handling edit")
@@ -314,7 +332,7 @@ class CreateEvent extends React.Component {
   }
 
 
-// Project Sections (new_ps) atts:
+// PROJECT SECTION create form/event handlers:
 
   handleNameChange(e){
     console.log("handling name change")
@@ -398,58 +416,7 @@ class CreateEvent extends React.Component {
   }
 
 
-  editPS(id){
-    console.log("editing project section")
-    var new_state = id
-    var length = this.state.ps_list.length
-    var i
-    for(i=0;i<length;i++){
-      var ps = this.state.ps_list[i]
-      if(ps.id === new_state){
-        if(ps.completed === true){
-        this.setState({
-          editing_ps:new_state,
-          activePs:ps,
-          checked:true
-        })
-        }else{
-          this.setState({
-            editing_ps:new_state,
-            activePs:ps,
-            checked:false
-          })
-        }
-      }
-    }
-  }
-
-
-  componentDidUpdate(){
-    console.log("did update")
-    if(this.state.updated === true && this.state.updated_2 === false  && this.state.final === false){
-      console.log("updated 1")
-    }else if(this.state.updated === true && this.state.updated_2 === true){
-      console.log("updated 2")
-      var x = this.state.new_project.id
-      this.fetchProjectUpdate()
-      this.setState({
-        updated_2:false,
-      })
-    }else if(this.state.final === true){
-      console.log("updated final")
-      var x = this.state.new_project.id
-      this.fetchProjectSections()
-      this.setState({
-        final:false,
-        project_id:x
-      })
-    }else{
-      console.log("updated else")
-    }
-  }
-
-
-  handleSectionSubmit(e){
+ handleSectionSubmit(e){
     e.preventDefault()
     console.log("Fetching create")
     var csrftoken = this.getCookie('csrftoken')
@@ -488,51 +455,78 @@ class CreateEvent extends React.Component {
       }
    }
 
-
-  handleSectionEditSubmit(e){
-    console.log("Fetching section update")
-    e.preventDefault()
-
-    var csrftoken = this.getCookie('csrftoken')
-    var x = this.state.editing_ps
-    console.log("this.state.editing_ps: " + x)
-    var url = `http://127.0.0.1:8000/api/update-ps/${x}/`
-    console.log("*3* url: " + url)
-    fetch(url, {
-      signal : this.abortController.signal,
-      method:'POST',
-      headers:{
-        'Content-type':'application/json',
-        'X-CSRFToken':csrftoken,
-      },
-      body:JSON.stringify(this.state.new_ps)
-    }).then(response => response.json()
-     ).then(data =>
-        this.setState({
-          updated:true,
-          final:true,
-          editing:false,
-          editing_ps:false,
-          new_ps:{
-            'id':null,
-            'name':'',
-            'date':'',
-            'project':'',
-            'in_progress':true,
-            'completed':false
-          }
-        })
-     ).catch(function(error){
-       console.log("ERROR:", error)
-     })
-  }
+// PROJECT SECTION update event handlers//
+// click function, toggles view between editing and
+// not editing the project section:
+ editPS(id){
+   console.log("editing project section")
+   var new_state = id
+   var length = this.state.ps_list.length
+   var i
+   for(i=0;i<length;i++){
+     var ps = this.state.ps_list[i]
+     if(ps.id === new_state){
+       if(ps.completed === true){
+       this.setState({
+         editing_ps:new_state,
+         activePs:ps,
+         checked:true
+       })
+       }else{
+         this.setState({
+           editing_ps:new_state,
+           activePs:ps,
+           checked:false
+         })
+       }
+     }
+   }
+ }
 
 
+handleSectionEditSubmit(e){
+  console.log("Fetching section update")
+  e.preventDefault()
+  var csrftoken = this.getCookie('csrftoken')
+  var x = this.state.editing_ps
+  console.log("this.state.editing_ps: " + x)
+  var url = `http://127.0.0.1:8000/api/update-ps/${x}/`
+  console.log("*3* url: " + url)
+  fetch(url, {
+    signal : this.abortController.signal,
+    method:'POST',
+    headers:{
+      'Content-type':'application/json',
+      'X-CSRFToken':csrftoken,
+    },
+    body:JSON.stringify(this.state.new_ps)
+  }).then(response => response.json()
+   ).then(data =>
+      this.setState({
+        updated:true,
+        final:true,
+        editing:false,
+        editing_ps:false,
+        new_ps:{
+          'id':null,
+          'name':'',
+          'date':'',
+          'project':'',
+          'in_progress':true,
+          'completed':false
+        }
+      })
+   ).catch(function(error){
+     console.log("ERROR:", error)
+   })
+ }
+
+
+// PROJECT SECTION list/delete calls:
   fetchProjectSections(){
     console.log("fetching project sections")
     var proj_id = this.state.new_project.id
     console.log("proj_id 2: " + proj_id)
-
     var url = `http://127.0.0.1:8000/api/ps-list/${proj_id}/`
     fetch(url)
     .then(response => response.json())
@@ -544,7 +538,6 @@ class CreateEvent extends React.Component {
     console.log("ERROR:", error)
     })
   }
-
 
  fetchPSDelete(id){
    var csrftoken = this.getCookie('csrftoken')
@@ -580,13 +573,14 @@ class CreateEvent extends React.Component {
  }
 
 
+// click function for adding a project section:
  expand(){
     this.setState({
       add_ps:true
     })
   }
 
-
+// reversing add_ps state:
  canc(e){
     e.stopPropagation()
     this.setState({
@@ -594,35 +588,33 @@ class CreateEvent extends React.Component {
     })
   }
 
-
-  clear(){
-    this.setState({
-      editing_ps:false,
-      add_ps: false,
-      editing: false,
-      activePs:{
-        'id':null,
-        'name':'',
-        'date':'',
-        'project':'',
-        'in_progress':true,
-        'completed':false
-      }
-    })
-  }
-
+// clears all current data from project section's edit form:
+ clear(){
+  this.setState({
+    editing_ps:false,
+    add_ps: false,
+    editing: false,
+    activePs:{
+      'id':null,
+      'name':'',
+      'date':'',
+      'project':'',
+      'in_progress':true,
+      'completed':false
+    }
+  })
+ }
 
 
   render(){
     var error = this.state.error
-    var updated = this.state.updated
-    var updated_2 = this.state.updated_2
+    var updated = this.state.updated        // Toggled to true once main project create form is submitted
 
-    var add_ps = this.state.add_ps
+    var add_ps = this.state.add_ps          // Toggled to true when add project section is clicked
     var ps_list = this.state.ps_list
     var self = this
-    var editing = this.state.editing
-    var editing_ps = this.state.editing_ps
+    var editing = this.state.editing        // Toggled to true whilst editing main project
+    var editing_ps = this.state.editing_ps  // Toggled to true whilst editing a project section
 
     var active_ps = this.state.activePs
 
@@ -635,6 +627,9 @@ class CreateEvent extends React.Component {
     }
 
 
+// Lines 637-646: error view (caught in handleSubmit(),line 227)
+
+
     return(
 
           <div style={{paddingBottom:"8px"}}>
@@ -643,7 +638,9 @@ class CreateEvent extends React.Component {
                     <div className="error-outer e">
                       <div className="error">
                           <p style={{marginBottom:"40px"}}>Error: Unable to save project. All fields must be filled out.</p>
-                          <button onClick={()=> this.setState({error:false})} type="button"><Link className="b-font link-style" to={{pathname:"/create/"}}>Try again</Link></button>
+                          <button onClick={()=> this.setState({error:false})} type="button">
+                            <Link className="b-font link-style" to={{pathname:"/create/"}}>Try again</Link>
+                          </button>
                           <button type="button"><Link className="b-font link-style"
                            to={{pathname:"/"}}>Back to my profile</Link></button>
                       </div>
@@ -898,8 +895,8 @@ class CreateEvent extends React.Component {
                                                                                         </div>
                                                                                         )}
                                                                                       )}
-                                                                                </td>
-                                                                              </tr>
+                                                                                 </td>
+                                                                               </tr>
                                                                             </table>
                                                                           </div>
 
